@@ -1,16 +1,28 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template,request, session, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'Chave forte'
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
-@app.route('/')
+class NameForm(FlaskForm):
+    name = StringField('qual seu nome?', validators=[DataRequired()])
+    Submit = SubmitField('Submit')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-   now = datetime.utcnow()
-   return render_template('index.html', current_time=now)
+    name = None
+    form = NameForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = ''  # Limpa o campo após o envio
+    return render_template('index.html', form=form, name=name)
 
 @app.route('/user/<name>/<prontuario>/<instituicao>')
 def user(name, prontuario, instituicao):
@@ -22,9 +34,9 @@ def page_not_found(e):
 
 @app.route('/contextorequisicao/<name>')
 def contextorequisicao(name):
-    user_agent = request.headers.get('User-Agent')  # Informações do navegador
-    remote_ip = request.remote_addr  # IP do usuário
-    host = request.host  # Host da aplicação
+    user_agent = request.headers.get('User-Agent') 
+    remote_ip = request.remote_addr  
+    host = request.host  
 
     return render_template('contexto.html', name=name, user_agent=user_agent, remote_ip=remote_ip, host=host)
 
