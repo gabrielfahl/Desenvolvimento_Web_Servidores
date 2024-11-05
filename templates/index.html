@@ -1,11 +1,27 @@
-{% extends 'base.html' %}
-{% import "bootstrap/wtf.html" as wtf%}
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-{% block content %}
-<div class="container">
-        <h1>Hello, {% if name %}{{name}}{%else%}Strange{%endif%}!</h1 >
+{% block title %}Flasky{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        </div>
+                <h1>Olá, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
+                <h2>A sua Insituição de ensino é {{institution}}</h2>
+                <h3>Está cursando a disciplina de {% if subject %}{{ subject }}{% endif %}</h3>
+                <br>
+                <h4>O IP do computador remoto é: {{ ip }}</h4>
+                <h4>O host da aplicação é: {{ host }}</h4>
+        </div>
 </div>
-{{wtf.quick_form(form)}}
-{% endblock %}class NameForm(FlaskForm):
-    name = StringField('qual seu nome?', validators=[DataRequired()])
-    Submit = SubmitField('Submit')
+
+<div class="page_content">
+                {{ wtf.quick_form(form) }}    
+</div>
+
+<div class="page-header">
+<p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>
+<p>That was {{ moment(current_time).fromNow(refresh=True) }}</p>
+</div>
+
+{% endblock %}

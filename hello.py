@@ -3,28 +3,45 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Chave forte'
+
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
 class NameForm(FlaskForm):
     name = StringField('qual seu nome?', validators=[DataRequired()])
+    lastname = StringField('qual seu sobrenome?', validators=[DataRequired()])
+    institution = StringField('Informe a sua instituição de ensino:', validators=[DataRequired()])
+    subject = SelectField('Informe a sua disciplina:', choices=["DSWA5", "DWBA4", "Gestão de Projetos"], validators=[DataRequired()])
     Submit = SubmitField('Submit')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = NameForm()
+    now = datetime.utcnow()
+    ip = None
+    host = None
+
     if form.validate_on_submit():
         old_name = session.get('name')
         if old_name is not None and old_name != form.name.data:
             Flask('Looks like you have changed your name!')
         session['name'] = form.name.data
-        return redirect(url_for('index'))
-    return render_template('index.html', form=form, name=session.get('name'))
+        session['last_name'] = form.lastname.data
+        session['institution'] = form.institution.data
+        session['subject'] = form.subject.data
+        # return redirect(url_for('index'))
+
+        form.name.data = None
+        form.lastname.data = None
+        form.institution.data = None
+        ip = request.remote_addr
+        host = request.headers.get('Host')
+    return render_template('index.html', form=form, name=session.get('name'), lastname=session.get('lastname'), institution=session.get('institution'), subject=session.get('subject'), current_time=now, ip=ip, host=host)
 
 @app.route('/user/<name>/<prontuario>/<instituicao>')
 def user(name, prontuario, instituicao):
